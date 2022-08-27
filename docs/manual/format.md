@@ -1,20 +1,14 @@
 ---
 layout: default
-title: rpm.org - RPM Package format
+title: rpm.org - RPM软件包格式
 ---
 # Package format
 
-This document describes the RPM file format version 3.0, which is used
-by RPM versions 2.1 and greater.  The format is subject to change, and
-you should not assume that this document is kept up to date with the
-latest RPM code.  That said, the 3.0 format should not change for
-quite a while, and when it does, it will not be 3.0 anymore :-).
+本文件描述了RPM文件格式3.0版，它被RPM 2.1版和更高版本所使用。 该格式可能会发生变化，你不应该认为这个文件是与最新的RPM代码保持同步的。 也就是说，3.0的格式应该在相当长的一段时间内不会改变，而当它改变时，它将不再是3.0 :-)。
 
-\warning In any case, THE PROPER WAY TO ACCESS THESE STRUCTURES IS THROUGH
-THE RPM LIBRARY!!
+\警告 在任何情况下，访问这些结构的正确方式是通过RPM库！。
 
-The RPM file format covers both source and binary packages.  An RPM
-package file is divided in 4 logical sections:
+RPM文件格式包括源代码和二进制包。 一个RPM包文件被分为4个逻辑部分。
 
 ```
 . Lead      -- 96 bytes of "magic" and other info
@@ -23,17 +17,13 @@ package file is divided in 4 logical sections:
 . Payload   -- compressed archive of the file(s) in the package (aka "payload")
 ```
 
-All 2 and 4 byte "integer" quantities (int16 and int32) are stored in
-network byte order.  When data is presented, the first number is the
-byte number, or address, in hex, followed by the byte values in hex,
-followed by character "translations" (where appropriate).
+所有2字节和4字节的 "整型" 数据（int16和int32）都以网络字节顺序存储。 当数据呈现时，第一个数字是十六进制的字节编号或地址，接着是十六进制的字节值，然后是字符 "翻译"（适当时）。
 
 ## Lead
 
-The Lead is basically for file(1).  All the information contained in
-the Lead is duplicated or superceded by information in the Header.
-Much of the info in the Lead was used in old versions of RPM but is
-now ignored.  The Lead is stored as a C structure:
+Lead基本上是用于文件(1)。 所有包含在Lead中的信息都被Header中的信息所重复或取代。
+
+Lead中的许多信息在RPM的旧版本中被使用，但现在被忽略了。 Lead被存储为一个C结构:
 
 \code
 struct rpmlead {
@@ -48,31 +38,20 @@ struct rpmlead {
 };
 \endcode
 
-and is illustrated with one pulled from the rpm-2.1.2-1.i386.rpm
-package:
+并用从 rpm-2.1.2-1.i386.rpm 包中提取的一个进行说明：
 
 ```
 00000000: ed ab ee db 03 00 00 00
 ```
 
-The first 4 bytes (0-3) are "magic" used to uniquely identify an RPM
-package.  It is used by RPM and file(1).  The next two bytes (4, 5)
-are int8 quantities denoting the "major" and "minor" RPM file format
-version.  This package is in 3.0 format.  The following 2 bytes (6-7)
-form an int16 which indicates the package type.  As of this writing
-there are only two types: 0 == binary, 1 == source.
+前 4 个字节 (0-3) 是“magic”，用于唯一标识 RPM 包。 它供 RPM 和 file(1) 使用。 接下来的两个字节（4、5）是 int8 数据，表示“主要”和“次要”RPM 文件格式版本。 此软件包为 3.0 格式。 接下来的两个字节 (6-7) 形成一个 int16，指示包类型。 在撰写本文时只有两种类型：0 == 二进制，1 == 源代码。
 
 ```
 00000008: 00 01 72 70 6d 2d 32 2e    ..rpm-2.
 ```
 
-The next two bytes (8-9) form an int16 that indicates the architecture
-the package was built for.  While this is used by file(1), the true
-architecture is stored as a string in the Header.  See, lib/misc.c for
-a list of architecture->int16 translations.  In this case, 1 == i386.
-Starting with byte 10 and extending to byte 75, are 65 characters and
-a null byte which contain the familiar "name-version-release" of the
-package, padded with null (0) bytes.
+再接下来的两个字节 (8-9) 形成一个 int16，表示构建包的架构。虽然这由 file(1) 使用，但真正的体系结构作为字符串存储在 Header 中。 请参阅 lib/misc.c 以获取 架构->int16 翻译的列表。在这里，1 == i386。
+从字节 10 开始并扩展到字节 75，是 65 个字符和一个空字节，其中包含熟悉的包的“名称-版本-发布”，用null (0)字节填充。
 
 ```
 00000010: 31 2e 32 2d 31 00 00 00    1.2-1...
@@ -85,33 +64,20 @@ package, padded with null (0) bytes.
 00000048: 00 00 00 00 00 01 00 05    ........
 ```
 
-Bytes 76-77 ("00 01" above) form an int16 that indicates the OS the
-package was built for.  In this case, 1 == Linux.  The next 2 bytes
-(78-79) form an int16 that indicates the signature type.  This tells
-RPM what to expect in the Signature.  For version 3.0 packages, this
-is 5, which indicates the new "Header-style" signatures.
+字节 76-77（上面的“00 01”）形成一个 int16，指示构建包的操作系统。 在这种情况下，1 == Linux。 接下来的 2 个字节 (78-79) 形成一个 int16，指示签名类型。 这告诉 RPM 在签名中期望什么。 对于版本 3.0 包，这是 5，表示新的“header样式”签名。
 
 ```
 00000050: 04 00 00 00 68 e6 ff bf    ........
 00000058: ab ad 00 08 3c eb ff bf    ........
 ```
 
-The remaining 16 bytes (80-95) are currently unused and are reserved
-for future expansion.
+剩余的 16 个字节 (80-95) 当前未使用，保留用于未来扩展。
 
 ## Signature
 
-A 3.0 format signature (denoted by signature type 5 in the Lead), uses
-the same structure as the Header.  For historical reasons, this
-structure is called a "header structure", which can be confusing since
-it is used for both the Header and the Signature.  The details of the
-header structure are given below, and you'll want to read them so the
-rest of this makes sense.  The tags for the Signature are defined in
-lib/signature.h.
+3.0 格式的签名（在 Lead 中由签名类型 5 表示）使用与 Header 相同的结构。 由于历史原因，这种结构被称为“header结构”，由于它同时用于Header和Signature，因此可能会造成混淆。 下面给出了标题结构的详细信息，您需要阅读它们，以便其余部分有意义。 Signature的标签在 lib/signature.h 中定义。
 
-The Signature can contain multiple signatures, of different types.
-There are currently only three types, each with its own tag in the
-header structure:
+Signature可以包含多个不同类型的签名。 目前只有三种类型，每种在头部结构中都有自己的标签：
 
 ```
 	Name	Tag	Header Type
@@ -121,38 +87,23 @@ header structure:
 	PGP	1002	BIN
 ```
 
-The MD5 signature is 16 bytes, and the PGP signature varies with
-the size of the PGP key used to sign the package.
+MD5 签名为 16 字节，PGP 签名随用于对包进行签名的 PGP 密钥的大小而变化。
 
-As of RPM 2.1, all packages carry at least SIZE and MD5 signatures,
-and the Signature section is padded to a multiple of 8 bytes.
+从 RPM 2.1 开始，所有包都至少带有 SIZE 和 MD5 签名，并且 Signature 部分被填充为 8 字节的倍数。
 
 ## Header
 
-The Header contains all the information about a package: name,
-version, file list, etc.  It uses the same "header structure" as the
-Signature, which is described in detail below.  A complete list of the
-tags for the Header would take too much space to list here, and the
-list grows fairly frequently.  For the complete list see lib/rpmlib.h
-in the RPM sources.
+Header 包含了一个包的所有信息：名称、版本、文件列表等。它使用与 Signature 相同的“头结构”，下面将详细介绍。 Header的完整标签列表将占用太多空间，并且列表增长相当频繁。 有关完整列表，请参见 RPM 源代码中的 lib/rpmlib.h。
 
 ## Payload
 
-The Payload is currently a gzipped cpio archive.  The cpio
-archive type used is SVR4 with a CRC checksum.
+Payload 当前是一个 gzip 压缩的 cpio 存档。 使用的 cpio 存档类型是带有 CRC 校验和的 SVR4。
 
 ## The Header Structure
 
-The header structure is a little complicated, but actually performs a
-very simple function.  It acts almost like a small database in that it
-allows you to store and retrieve arbitrary data with a key called a
-"tag".  When a header structure is written to disk, the data is
-written in network byte order, and when it is read from disk, is is
-converted to host byte order.
+header结构有点复杂，但实际上执行了一个非常简单的功能。 它的行为几乎就像一个小型数据库，因为它允许您使用称为“标签”的键存储和检索任意数据。 当头结构写入磁盘时，数据以网络字节顺序写入，当从磁盘读取时，转换为主机字节顺序。
 
-Along with the tag and the data, a data "type" is stored, which indicates,
-obviously, the type of the data associated with the tag.  There are
-currently 9 types:
+与标签和数据一起，存储了数据“类型”，它显然表示与标签相关联的数据的类型。 目前有9种：
 
 ```
 	Type		Number
@@ -169,50 +120,29 @@ currently 9 types:
 	I18NSTRING_TYPE	9
 ```
 
-One final piece of information is a "count" which is stored with each
-tag, and indicates the number of items of the associated type that are
-stored.  As a special case, the STRING type is not allowed to have a
-count greater than 1.  To store more than one string you must use a
-STRING_ARRAY.
+最后一条信息是与每个标签一起存储的“计数”，并指示存储的相关类型的项目的数量。 作为一种特殊情况，STRING 类型的计数不允许大于 1。要存储多个字符串，您必须使用 STRING_ARRAY。
 
-Altogether, the tag, type, count, and data are called an "Entry" or
-"Header Entry".
+总而言之，标签、类型、计数和数据称为“Entry”或“Header Entry”。
 
 ```
 00000000: 8e ad e8 01 00 00 00 00    ........
 ```
 
-A header begins with 3 bytes of magic "8e ad e8" and a single byte to
-indicate the header version.  The next four bytes (4-7) are reserved.
+header以 3 个字节的魔法“8e ad e8”和一个指示header版本的字节开头。接下来的四个字节 (4-7) 被保留。
 
 ```
 00000008: 00 00 00 20 00 00 07 77    ........
 ```
 
-The next four bytes (8-11) form an int32 that is a count of the number
-of entries stored (in this case, 32).  Bytes 12-15 form an int32 that
-is a count of the number of bytes of data stored (that is, the number
-of bytes made up by the data portion of each entry).  In this case it
-is 1911 bytes.
+接下来的四个字节 (8-11) 形成一个 int32，它是存储的条目数的计数（在本例中为 32）。 字节 12-15 形成一个 int32，它是存储的数据字节数的计数（即每个条目的数据部分组成的字节数）。 在这种情况下，它是 1911 字节。
 
 ```
 00000010: 00 00 03 e8 00 00 00 06 00 00 00 00 00 00 00 01    ................
 ```
 
-Following the first 16 bytes is the part of the header called the
-"index".  The index is made of up "index entries", one for each entry
-in the header.  Each index entry contains four int32 quantities.  In
-order, they are: tag, type, offset, count.  In the above example, we
-have tag=1000, type=6, offset=0, count=1.  By looking up the the tag
-in lib/rpmlib.h we can see that this entry is for the package name.
-The type of the entry is a STRING.  The offset is an offset from the
-start of the data part of the header to the data associated with this
-entry.  The count indicates that there is only one string associated
-with the entry (which we really already knew since STRING types are
-not allowed to have a count greater than 1).
+在前 16 个字节之后是标头中称为“索引”的部分。 索引由“索引条目”组成，标题中的每个条目都有一个。 每个索引条目包含四个 int32 数量。 它们依次是：标签、类型、偏移量、计数。 在上面的例子中，我们有 tag=1000，type=6，offset=0，count=1。 通过查看 lib/rpmlib.h 中的标签，我们可以看到该条目是用于包名称的。 条目的类型是 STRING。 偏移量是从标头的数据部分开始到与该条目关联的数据的偏移量。 计数表明只有一个字符串与条目相关联（我们确实已经知道，因为不允许 STRING 类型的计数大于 1）。
 
-In our example there would be 32 such 16-byte index entries, followed
-by the data section:
+在我们的示例中，将有 32 个这样的 16 字节索引条目，然后是数据部分：
 
 ```
 00000210: 72 70 6d 00 32 2e 31 2e 32 00 31 00 52 65 64 20    rpm.2.1.2.1.Red 
@@ -224,16 +154,7 @@ by the data section:
 00000980: 73 6f 2e 32 00 00                                  so.2..
 ```
 
-The data section begins at byte 528 (4 magic, 4 reserved, 4 index
-entry count, 4 data byte count, 16 * 32 index entries).  At offset 0,
-bytes 528-531 are "rpm" plus a null byte, which is the data for the
-first index entry (the package name).  Following is is the data for
-each of the other entries.  Each string is null terminated, the strings
-in a STRING_ARRAY are also null terminated and are place one after
-another.  The integer types are aligned to appropriate byte boundaries,
-so that the data of INT64 type starts on an 8 byte boundary, INT32
-type starts on a 4 byte boundary, and an INT16 type starts on a 2 byte
-boundary.  For example:
+数据部分从字节 528 开始（4个magic，4个reserved，4个index条目count，4个数据字节count，16 * 32个索引条目）。在偏移量0处，字节528-531是“rpm”加上一个空字节，这是第一个索引条目（软件包名称）的数据。 以下是其他每个条目的数据。 每个字符串都是null终止的，STRING_ARRAY中的字符串也是null终止的，并且一个接一个地放置。整数类型与适当的字节边界对齐，因此 INT64 类型的数据从 8 字节边界开始，INT32 类型的数据从4字节边界开始，而INT16类型的数据从2字节边界开始。 例如：
 
 ```
 00000060: 00 00 03 ef 00 00 00 06 00 00 00 28 00 00 00 01    ................
@@ -243,10 +164,5 @@ boundary.  For example:
 00000250: 00 09 9b 31 52 65 64 20 48 61 74 20 4c 69 6e 75    ....Red Hat Linu
 ```
 
-Index entry number 6 is the BUILDHOST, of type STRING.  Index entry
-number 7 is the SIZE, of type INT32.  The corresponding data for entry
-6 end at byte 588 with "....redhat.com\0".  The next piece of data
-could start at byte 589, byte that is an improper boundary for an INT32.
-As a result, 3 null bytes are inserted and the date for the SIZE actually
-starts at byte 592: "00 09 9b 31", which is 629553).
+索引条目编号6是 STRING 类型的 BUILDHOST。 索引条目编号7是INT32类型的 SIZE。 条目编号6的相应数据在字节 588 处以“....redhat.com\0”结束。 下一条数据可能从字节 589 开始，该字节对于 INT32 来说是不正确的边界。 结果，插入了 3 个null字节，SIZE 的日期实际上从字节 592 开始：“00 09 9b 31”，即 629553）。
 

@@ -79,6 +79,7 @@ static const struct PartRec {
     { PART_EMPTY,		    LEN_AND_STR("%end")},
     { PART_PATCHLIST,               LEN_AND_STR("%patchlist")},
     { PART_SOURCELIST,              LEN_AND_STR("%sourcelist")},
+		{ PART_AUTOPKG,          LEN_AND_STR("%autopkg")},
     {0, 0, 0}
 };
 
@@ -937,6 +938,9 @@ static rpmSpec parseSpec(const char *specFile, rpmSpecFlags flags,
 	case PART_SOURCELIST:
 	    parsePart = parseList(spec, "%sourcelist", RPMTAG_SOURCE);
 	    break;
+//	case PART_AUTOPKG:
+//	    parsePart = parseAutopkg();
+//	    break;	
 	case PART_PREP:
 	    parsePart = parsePrep(spec);
 	    break;

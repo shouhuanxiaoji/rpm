@@ -1,15 +1,15 @@
 ---
 layout: default
-title: rpm.org - Package Build Process
+title: rpm.org - 软件包构建过程
 ---
-# Package Build Process
+# 软件包构建过程
 
-* Unpack srpm/tar (optional)
-* [Parse spec](https://github.com/rpm-software-management/rpm/blob/master/build/parseSpec.c)  - see also [build/parse*.c](https://github.com/rpm-software-management/rpm/blob/master/build/)
-  * If  buildarch detected parse spec multiple times - once for each arch with `_target_cpu` macro set
+* 解压 srpm/tar (可选)
+* [解析 spec](https://github.com/rpm-software-management/rpm/blob/master/build/parseSpec.c)  - 又见 [build/parse*.c](https://github.com/rpm-software-management/rpm/blob/master/build/)
+  * 如果buildarch检测到则多次解析spec--为每个设置了`_target_cpu'宏的arch解析一次
   * Build will iterate over all the spec variants and build multiple versions
-* Check static build requires
-* Execute build scripts (see [doScript()](https://github.com/rpm-software-management/rpm/blob/master/build/build.c#L95)
+* 检查静态的requires
+* 执行构建脚本 (see [doScript()](https://github.com/rpm-software-management/rpm/blob/master/build/build.c#L95)
   * %prep
   * %generate_buildrequires if present
     * re-check build requires - stop build on errors
@@ -17,12 +17,12 @@ title: rpm.org - Package Build Process
   * %build
   * %install
   * %check - if present
- * Process files
-   * Turn %files lines into actual files (evaluate globs)
-     * Read from -f param
-   * Run [file classifiers](https://github.com/rpm-software-management/rpm/blob/master/build/rpmfc.c) 
-   * Generate automatic dependencies
-   * Check packaged files against install root 
- * Create packages
+ * 处理 files
+   * 将%files行变成实际文件（evaluate globs）
+     * 从-f参数读取
+   * 运行 [file classifiers](https://github.com/rpm-software-management/rpm/blob/master/build/rpmfc.c) 
+   * 生成自动的依赖列表
+   * 根据安装根目录检查打包的文件
+ * 创建软件包
  * %clean
- * Clean up
+ * 清理

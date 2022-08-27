@@ -1,16 +1,12 @@
 ---
 layout: default
-title: rpm.org - Architecture-specific Dependencies
+title: rpm.org - 特定架构的依赖
 ---
 
 
-# Architecture-specific Dependencies
+# 特定架构的依赖
 
-On multiarch systems such as x86_64 it would be often desireable to express that a package of compatible architecture is
-needed to satisfy a dependency. In most of the cases this is already handled by the automatically extracted soname dependencies,
-but this is not always the case: sometimes it's necessary to disable the automatic dependency generation, and then there
-are cases where the information cannot be automatically generated, such as -devel package dependencies on other -devel packages
-and build dependencies. Consider the following:
+在多架构系统(如x86_64)上，通常需要表示需要兼容架构的包来满足依赖性。在大多数情况下，这已经由自动提取的soname依赖项处理，但情况并非总是如此：有时需要禁用自动依赖项生成，然后在某些情况下，信息无法自动生成，例如-devel包依赖于其他-devel软件包和构建依赖项。考虑以下问题：
 
 ```
 Name: foo
@@ -22,24 +18,17 @@ Requires: libbar-devel >= 2.2
 ...
 ```
 
-This works fine on single-arch systems such as i386, but it's not sufficient on multiarch systems: when
-building a 32bit package on a 64bit system, a 32bit version of the libbar-devel would be needed, but the above lets 
-libbar-devel.x86_64 satisfy the build dependency too, leading to obscure build failure. Similarly
-a 32bit libbar-devel would incorrectly satisfy the dependency for a 64bit package.
+这在i386等单架构系统上运行良好，但在多架构系统上还不够：在64位系统上构建32位软件包时，需要32位版本的libbar-devel，但上面允许libbar-debel。x86_64也满足构建依赖性，导致模糊的构建失败。类似地，32位libbar-devel将不正确地满足64位包的依赖性。
 
-## ISA Dependencies
+## ISA的依赖
 
-In rpm 4.6.0, the concept of ISA (Instruction Set Architecture) was introduced to permit
-differentiating between 32- and 64-bit versions without resorting to file dependencies on obscure and/or 
-library-version dependent paths. To declare a dependency on a package name architecture specific, 
-append %{?_isa} to the dependency name, eg
+在rpm 4.6.0中，引入了ISA(指令集架构)的概念，以允许在32位和64位版本之间进行区分，而无需依赖于模糊和/或库版本相关路径上的文件依赖性。要声明对包名体系结构特定的依赖项，请在依赖项名称后面附加%{?_isa}，例如
 
 ```
 Requires: libbar-devel%{?_isa} >= 2.2
 ```
 
-This will expand to libbar-devel(archfamily-bitness) depending on the build target architecture,
-for example a native build on x86_64 would give
+这将扩展到libbar-devel(archfamily-bitness)，具体取决于构建目标体系结构，例如，基于x86_64的本地构建将给出
 
 ```
 Requires: libbar-devel(x86-64) >= 2.2
@@ -51,19 +40,13 @@ but with --target i386 (or i586, i686 etc) it would become
 Requires: libbar-devel(x86-32) >= 2.2
 ```
 
-Note that this requires all the involved packages must have been built with rpm >= 4.6.0,
-older versions do not add the necessary name(isa) provides to packages.
+请注意，这要求所有涉及的软件包必须是使用rpm>=4.6.0构建的，旧版本不向软件包添加必要的名称(isa)。
 
-## Anatomy of ISA macros
+## 剖析ISA宏
 
-The ISA of a system in rpm consists of two parts: the generic
-architecture family, and the bitness of the architecture. These are declared in the platform
-specific macro files: %{!__isa_name} holds the architecture family and %{!__isa_bits} is the bitness.
-The %{_isa} macro is just a convenience wrapper to format this to "(arch-bits)", and using the conditional
-format %{?_isa} allows for backwards compatible use in spec files.
+rpm中系统的ISA由两部分组成：通用体系结构族和体系结构的位性(bitness)。它们在特定于平台的宏文件中声明：%{!__isa_name}包含体系结构族，%{!__isa_bits}是位数。"%{_isa}宏只是一个方便的包装器，用于将其格式化为 "(arch bits)"，使用条件格式 "%{?_isa}" 允许在规范文件中向后兼容使用。
 
-Besides the common-case use of just "Requires: foo%{_isa} >= 1.2.3", this two-part scheme permits
-some rare special cases such as 64bit package also requiring 32bit version of the same architecture family:
+除了"Requires: foo%{_isa} >= 1.2.3"的常见情况外，这种两部分方案还允许一些罕见的特殊情况，例如64位包也需要相同体系结构系列的32位版本：
 
 ```
 Requires: foo%{_isa}
@@ -72,24 +55,17 @@ Requires: foo(%{__isa_name}-32)
 %endif
 ```
 
-Note that there are systems with 64bit ISA which are not multiarch, so simply testing for %{!__isa_bits} in
-the above example is not correct in all cases.
+请注意，有些具有64位ISA的系统不是multiarch的，因此在上述示例中简单测试 %{!__ISA_bits} 在所有情况下都是不正确的。
 
-## Rationale
+## 理论依据
 
-The ISA-scheme is not what people typically think of when speaking of architecture specific dependencies, instead
-the general expectation is something like:
+当谈到特定于体系结构的依赖关系时，ISA方案不是人们通常想到的，相反，一般的期望是：
 
 ```
 Requires: %{name}.%{_target_cpu}
 ```
 
-While this would appear to be an obvious choice, it's not as useful as it initially seems: many architecture families
-have several "sub-architectures" (such as i386, i586 and i686) and it's sometimes desirable to offer more than one
-version of a package, optimized for a different architecture. For example, a package might come in i386 and i686 flavors.
-You'll want the best version for a given system, but if some other package had hardwired the literal %{_target_cpu} in a
-dependency, this could cause a) suboptimal package to be pulled in b) failure to install the package at all. "But make
-it a regular expression" doesn't fly either: you would end up with specs full of constructs like
+虽然这似乎是一个显而易见的选择，但它并不像最初看起来那么有用：许多架构系列有几个 "子架构"（如i386、i586和i686），有时最好能提供一个以上的软件包版本，为不同的架构进行优化。例如，一个软件包可能有i386和i686的版本。你会希望为特定的系统提供最好的版本，但如果其他软件包在依赖关系中硬性规定了%{_target_cpu}的字面意思，这可能会导致a）次优软件包被拉入b）根本无法安装该软件包。"但让它成为一个正则表达式 "也是行不通的：你会发现规范中充满了这样的结构，如
 
 ```
 %ifarch %ix86
@@ -101,18 +77,8 @@ Requires: %{name}.(x86_64|amd64|ia32e)
 ...
 ```
 
-So why not just use the "base arch", ie %{_arch} for it? The problem with this is that eg. i386 is already overloaded
-with meanings: it is used to mean the x86-32 architecture family, and also the physical i386 CPU. So if you had
-i386 and i686 flavors of a package, the "base architecture" of the i686 variant would be i386, and ... oops, it's
-not possible to tell whether it means an actual i386 CPU or i386-compatible architecture. The ISA naming scheme avoids
-this ambiguity: ISA always means architecture family, not any specific architecture flavor.
+那么为什么不直接使用 "基本架构"，即%{_arch}呢？这样做的问题是，比如i386已经有太多的含义了：它被用来表示x86-32架构系列，同时也表示物理的i386 CPU。因此，如果你有i386和i686两种版本的软件包，i686变体的 "基本架构 "将是i386，而......哎呀，不可能区分它是指实际的i386 CPU还是i386兼容的架构。ISA的命名方案避免了这种歧义：ISA总是指架构家族，而不是任何特定的架构风味。
 
-The other important aspect of the implementation is compatibility: by adding the ISA information as additional
-regular provides, packages remain 100% compatible with older rpm versions and depsolvers such as yum and urpmi without
-any code changes. This wouldn't have been the case if the implementation relied on %{arch} tag from headers. Also
-the conditional macro syntax permits spec files to be backwards compatible: when built with an rpm without ISA support,
-it'll just fall back to former behavior.
+实现的另一个重要方面是兼容性：通过添加ISA信息作为额外的常规规定，软件包与旧的rpm版本和yum和urpmi等解算器保持100%的兼容，而不需要修改任何代码。如果实现依赖于头文件中的%{arch}标签，就不会出现这种情况。此外，有条件的宏语法允许规格文件向后兼容：当用不支持ISA的rpm构建时，它将回到以前的行为。
 
-It's possible that the expected "Requires: %{name}.%{_target_cpu}" style dependencies become supported too at some point,
-but the need for this is rare and can be already accomplished by adding manual arch-specific provides+requires to the
-packages that need it (or by arranging arch-specific filename(s) in packages and depending on those).
+有可能在某个时候也支持预期的 "Requires: %{name}.%{_target_cpu}"风格的依赖关系，但这种需要很少，而且已经可以通过在需要的包中添加手动的arch-specific provides+requires（或者在包中安排arch-specific文件名并依赖这些）来实现。

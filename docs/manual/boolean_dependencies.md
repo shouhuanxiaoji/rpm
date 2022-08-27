@@ -4,11 +4,11 @@ title: rpm.org - Boolean Dependencies
 ---
 ## Boolean Dependencies
 
-Starting with rpm-4.13, RPM is able to process boolean expressions in all dependencies (Requires, Recommends, Suggests, Supplements, Enhances, Conflicts). Boolean Expressions are always enclosed with parenthesis. They are build out of "normal" dependencies: either name only or name, comparison and version description.
+从rpm-4.13开始，rpm能够处理所有依赖项中的布尔表达式（需要、推荐、建议、补充、增强、冲突）。布尔表达式总是用括号括起来。它们是基于“普通”依赖关系构建的：要么是名称，要么是名称、比较和版本描述。
 
 ## Boolean Operators
 
-The following operators were introduced in RPM 4.13:
+RPM 4.13中介绍了以下运算符：
 
  * `and` - requires all operands to be fulfilled for the term to be True.
   * `Conflicts: (pkgA and pkgB)`
@@ -19,7 +19,7 @@ The following operators were introduced in RPM 4.13:
  * `if else` - same as above but requires the third operand to be fulfilled if the second is not
   * `Requires: (myPkg-backend-mariaDB if mariaDB else sqlite)`
 
-The following additional operators were introduced in RPM 4.14:
+RPM 4.14中引入了以下附加运算符：
 
  * `with` - requires all operands to be fulfilled by the same package for the term to be True.
   * `Requires: (pkgA-foo with pkgA-bar)`
@@ -30,11 +30,11 @@ The following additional operators were introduced in RPM 4.14:
  * `unless else` - same as above but requires the third operand to be fulfilled if the second is
   * `Conflicts: (myPkg-backend-SDL1 unless myPkg-backend-SDL2 else SDL2)`
 
-The `if` operator cannot be used in the same context with `or` and the `unless` operator cannot be used in the same context with `and`.
+`if` 运算符不能与 `or` 在同一上下文中使用， `unless` 运算符不能在与 `and` 相同的上下文中使用。
 
 ## Nesting 
 
-Operands can be Boolean Expressions themselves. They also need to be surrounded by parenthesis. `and` and `or` operators may be chained together repeating the same operator with only one set of surrounding parenthesis.
+操作数本身可以是布尔表达式。它们还需要用括号括起来。 `and` 和 `or` 运算符可以链接在一起，仅用一组环绕括号重复相同的运算符。
 
 Examples:
 
@@ -52,13 +52,13 @@ Examples:
 
 ## Semantics
 
-The Semantic of the dependencies stay unchanged but instead checking for one match all names are checked and the Boolean value of there being a match is then aggregated over the Boolean operators. For a conflict to not prevent an install the result has to be False for everything else it has to be True.
+依赖项的语义保持不变，而是检查一个匹配项。检查所有名称，然后通过布尔运算符聚合存在匹配项的布尔值。如果冲突不能阻止安装，则结果必须为False，否则必须为True。
 
-Note that '''Provides''' are not dependencies and '''cannot contain Boolean Expressions'''.
+请注意，`Provides`不是依赖项，并且不能包含布尔表达式“”。
 
 ### Incompatible nesting of operators
 
-Note that the `if` operator is also returning a Boolean value. This is close to what the intuitive reading in most cases. E.g:
+注意，`if`运算符也返回布尔值。在大多数情况下，这接近于直觉读数。例如：
 
 `Requires: (pkgA if pkgB)` 
 

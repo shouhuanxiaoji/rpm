@@ -1,0 +1,13 @@
+# Hashes of file build rules.
+1ef53abce276db7314546794deacc7dd man/CMakeFiles/gendiff.1
+063cd02a2f331a6446537f84846678eb man/CMakeFiles/rpm-misc.8
+67d525ccc610f174fe8f43c3df973903 man/CMakeFiles/rpm.8
+f87a18ef7a36027134fab85e70448a38 man/CMakeFiles/rpm2cpio.8
+a7489c31f0bf273d74c9040c4aad27bd man/CMakeFiles/rpmbuild.8
+ccc7705cb6ad117e8255359d6ac1c7b3 man/CMakeFiles/rpmdb.8
+131c24c4888d3213ad83acaf0220e833 man/CMakeFiles/rpmdeps.8
+4c613db30430fe8a579c6904fa9a8d50 man/CMakeFiles/rpmgraph.8
+2b2b1fad91411ed2fb85b67f08959b1a man/CMakeFiles/rpmkeys.8
+8b1cd833144efa9752180cef927356ed man/CMakeFiles/rpmlua.8
+561f6d418790da0ecbcc4229671ff32e man/CMakeFiles/rpmsign.8
+80a047dce1fbfdd3a4ec35c8764311b7 man/CMakeFiles/rpmspec.8

@@ -1,47 +1,47 @@
 ---
 layout: default
-title: rpm.org - RPM Reference Manual
+title: rpm.org - RPM 参考手册
 ---
-# RPM Reference Manual
+# RPM 参考手册
 
-## Package Management
+## 软件包管理
 
-### Queries and RPM Meta Data
-* [RPM Tags](tags.md)
-* [Large File support](large_files.md)
+### 查询和 RPM 元数据
+* [RPM 标签](tags.md)
+* [大文件支持](large_files.md)
 * [Query formatting](queryformat.md)
 
-## Macro subsystem
-* [Macro syntax](macros.md)
-* [Embedded Lua](lua.md)
+## Macro 子系统
+* [Macro 语法](macros.md)
+* [内嵌的Lua](lua.md)
 
-## Package Building
-* [Build Process](buildprocess.md)
-* [Spec Syntax](spec.md)
+## 软件包构建
+* [构建过程](buildprocess.md)
+* [Spec语法](spec.md)
   * [Autosetup](autosetup.md)
-  * Dependencies
-    * [Dependencies Basics](dependencies.md)
-    * [More on Dependencies](more_dependencies.md)
-    * [Boolean Dependencies](boolean_dependencies.md)
-    * [Architecture Dependencies](arch_dependencies.md)
-    * [Installation Order](tsort.md)
-    * [Automatic Dependency Generation](dependency_generators.md)
-  * Install scriptlets
+  * 依赖处理
+    * [依赖处理的基础说明](dependencies.md)
+    * [依赖处理的更多说明](more_dependencies.md)
+    * [Boolean相关的依赖说明](boolean_dependencies.md)
+    * [架构相关的依赖说明](arch_dependencies.md)
+    * [安装 Order](tsort.md)
+    * [依赖自动生成的说明](dependency_generators.md)
+  * 安装脚本
     * [Triggers](triggers.md)
     * [File Triggers](file_triggers.md)
     * [Scriptlet Expansion](scriptlet_expansion.md)
-  * [Conditional Builds](conditionalbuilds.md)
+  * [构建中的条件判断](conditionalbuilds.md)
   * [Relocatable Packages](relocatable.md)
   * [Multiple build areas](multiplebuilds.md)
 
 
-## Developer Information
+## 开发者相关的信息
 
 ### API
-* [Plugin API](plugins.md)
+* [插件API](plugins.md)
 
 ### Package Format
-* [RPM v3 file format](format.md)
+* [RPM v3文件格式](format.md)
 * [RPM v4 header regions](hregions.md)
 * [RPM v4 signatures and digests](signatures_digests.md)
 

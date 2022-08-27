@@ -1,37 +1,20 @@
 ---
 layout: default
-title: rpm.org - Macro syntax
+title: rpm.org - 宏语法
 ---
-# Macro syntax
+# 宏语法
 
-RPM has fully recursive spec file macros.  Simple macros do straight text
-substitution. Parameterized macros include an options field, and perform
-argc/argv processing on white space separated tokens to the next newline.
-During macro expansion, both flags and arguments are available as macros
-which are deleted at the end of macro expansion.  Macros can be used
-(almost) anywhere in a spec file, and, in particular, in "included file
-lists" (i.e. those read in using %files -f \<file\>).  In addition, macros
-can be nested, hiding the previous definition for the duration of the
-expansion of the macro which contains nested macros.
+RPM有完全递归的spec文件宏。简单的宏直接进行文本替换。参数化的宏包括一个选项字段，并在空白分隔的标记上执行argc/argv处理，直到下一个换行。在宏的扩展过程中，标志和参数都可以作为宏来使用，在宏扩展结束时被删除。宏可以在spec文件的任何地方使用，特别是在 "included file lists" 中（即使用%files -f\<file\>读入的文件）。此外，宏可以被嵌套，在包含嵌套宏的宏扩展过程中隐藏之前的定义。
 
-## Defining a Macro
+## 定义宏
 
-To define a macro use:
+要定义一个宏，请使用:
 
 ```
 	%define <name>[(opts)] <body>
 ```
 
-All whitespace surrounding \<body\> is removed.  Name may be composed
-of alphanumeric characters, and the character `_' and must be at least
-3 characters in length. A macro without an (opts) field is "simple" in that
-only recursive macro expansion is performed. A parameterized macro contains
-an (opts) field. "-" as opts disables all option processing, otherwise
-the opts (i.e. string between parentheses) are passed
-exactly as is to getopt(3) for argc/argv processing at the beginning of
-a macro invocation. "--" can be used to separate options from arguments.
-While a parameterized macro is being expanded, the following shell-like
-macros are available:
+围绕着/<body\>的所有空白都被删除。 名称可以由字母数字字符和字符"_"组成，长度必须至少为3个字符。没有(opts)字段的宏是 "简单 "的，因为它只进行递归宏扩展。一个参数化的宏包含一个（opts）字段。作为opts的"-"可以禁用所有的选项处理，否则opts（即括号内的字符串）会在宏调用开始时完全传递给getopt(3)，用于处理argc/argv。"--"可以用来分隔选项和参数。当一个参数化的宏正在被展开时，以下类似shell的宏可以使用。
 
 ```
 	%0	the name of the macro being invoked
@@ -42,26 +25,17 @@ macros are available:
 	%1, %2	the arguments themselves (after getopt(3) processing)
 ```
 
-At the end of invocation of a parameterized macro, the above macros are
-(at the moment, silently) discarded.
+在一个参数化宏的调用结束时，上述宏会被丢弃。(目前是静止的)被丢弃。
 
-## Writing a Macro
+## 编写宏
 
-Within the body of a macro, there are several constructs that permit
-testing for the presence of optional parameters. The simplest construct
-is "%{-f}" which expands (literally) to "-f" if -f was mentioned when the
-macro was invoked. There are also provisions for including text if flag
-was present using "%{-f:X}". This macro expands to (the expansion of) X
-if the flag was present. The negative form, "%{!-f:Y}", expanding to (the
-expansion of) Y if -f was *not* present, is also supported.
+在宏的正文中，有几个结构允许测试是否存在可选参数。最简单的结构是"%{-f}"，如果调用宏时提到了-f，它就会扩展（字面意思）为"-f"。也有一些规定，如果有标志存在，可以使用"%{-f:X}"来包含文本。如果存在标志，该宏会扩展为（X的扩展）。也支持负数形式，"%{!-f:Y}"，如果*不存在-f，则扩展到（扩展）Y。
 
-In addition to the "%{...}" form, shell expansion can be performed
-using "%(shell command)".
+除了"%{...}"形式外，还可以使用"%(shell command) "进行shell扩展。使用"%(shell command)"。
 
 ## Builtin Macros
 
-There are several builtin macros (with reserved names) that are needed
-to perform useful operations. The current list is
+有几个内置的宏（有保留的名称），需要用来执行有用的操作。来执行有用的操作。目前的列表是：
 
 ```
 	%trace		toggle print of debugging information before/after
@@ -110,27 +84,18 @@ to perform useful operations. The current list is
 	%{P:...}	expand ... to <patch> file name
 ```
 
-Macros may also be automatically included from /usr/lib/rpm/macros.
-In addition, rpm itself defines numerous macros. To display the current
-set, add "%dump" to the beginning of any spec file, process with rpm, and
-examine the output from stderr.
+宏也可以从/usr/lib/rpm/macros自动包含。此外，rpm本身也定义了许多宏。要显示当前的集合，在任何规格文件的开头添加"%dump"，用rpm处理，并检查stderr的输出。
 
-## Conditionally Expanded Macros
+## 条件扩展宏
 
-Sometimes it is useful to test whether a macro is defined or not. Syntax
+有时，测试一个宏是否被定义是很有用的。语法
 
 ```
 %{?macro_name:value}
 %{?!macro_name:value}
 ```
 
-can be used for this purpose. %{?macro_name:value} is expanded to "value"
-if "macro_name" is defined, otherwise it is expanded to the empty string.
-%{?!macro_name:value} is the negative variant. It is expanded to "value" if
-"macro_name" not is defined. Otherwise it is expanded to the empty string.
-
-Frequently used conditionally expanded macros are e.g.
-Define a macro if it is not defined:
+可用于此目的。如果定义了 "macro_name"，%{?macro_name:value}会被扩展为 "value"，否则会扩展为空字符串。%{?!macro_name:value}是否定的变体。如果 "macro_name "没有被定义，它将被扩展为 "value"。"macro_name "没有被定义。否则，它将被扩展为空字符串。
 
 ```
 %{?!with_python3: %global with_python3 1}
@@ -150,13 +115,9 @@ or shortly
 
 %"{?macro_name}" is a shortcut for "%{?macro_name:%macro_name}".
 
-For more complex tests, use [expressions](#expression-expansion) or [Lua](lua).
-Note that `%if`, `%ifarch` and the like are not macros, they are spec
-directives and only usable in that context.
+对于更复杂的测试，使用[expressions](#expression-expansion)或[Lua](lua)。请注意，`%if`、`%ifarch`和类似的东西不是宏，它们是spec指令，只能在该环境下使用。
 
-Note that in rpm >= 4.17, conditionals on built-in macros simply test for
-existence of that built-in, just like with any other macros.
-In older versions, the behavior of conditionals on built-ins is undefined.
+请注意，在 rpm >= 4.17 中，内置宏上的条件语句只是测试该内置的存在，就像其他宏一样。在旧版本中，内置条件的行为是未定义的。
 
 ## Example of a Macro
 

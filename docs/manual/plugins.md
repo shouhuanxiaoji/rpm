@@ -4,9 +4,9 @@ title: rpm.org - RPM Plugin Interface (DRAFT)
 ---
 # RPM Plugin Interface (DRAFT)
 
- The current plugin interface is concentrated around what goes on inside rpmtsRun(), and there's little that happens outside it. There's no reason the interface could not be enhanced to other directions, this is just a consequence of one of the primary motivations behind the plugins: enabling other projects like SELinux and MSSF to handle the area they know best, and without having to support a dozen different security "frameworks" within rpm itself.
+当前的插件接口集中在 rpmtsRun() 内部发生的事情，而在它之外几乎没有发生什么。 没有理由不能将界面增强到其他方向，这只是插件背后的主要动机之一的结果：使 SELinux 和 MSSF 等其他项目能够处理他们最了解的领域，而无需支持十几个 rpm 本身内的不同安全“框架”。
 
-The plugin API consists of a set of hooks that mostly come in pairs. All hooks receive the plugin itself as the first argument, similarly to this of C++ or self in Python. As of RPM 4.12.0 the following hooks exist:
+插件 API 由一组大部分成对出现的钩子组成。 所有钩子都接收插件本身作为第一个参数，类似于 C++ 中的 this 或 Python 中的 self 。 从 RPM 4.12.0 开始，存在以下钩子：
 
 ```
 struct rpmPluginHooks_s { 
@@ -32,40 +32,40 @@ struct rpmPluginHooks_s {
 
 ## Initialization and cleanup
 
-Hooks `init` and `cleanup` should be fairly obvious. Init occurs at the time of first transaction element addition, whether its for install, erase or reinstall.
+钩子`init`和`cleanup`应该是相当明显的。初始化发生在第一个事务元素添加的时候，无论是安装、擦除还是重新安装。
 
-Cleanup occurs on rpmtsFree() call.
+在调用rpmtsFree()时进行清理。
 
 ## Per transaction hooks
 
-Hooks `tsm_pre` and `tsm_post` occur before and after execution of a transaction. More precisely, pre runs before any scripts have been executed or files laid down, and post runs after all scripts have executed and files have been laid down.
+钩子`tsm_pre`和`tsm_post`发生在事务执行之前和之后。更确切地说，pre在任何脚本被执行或文件被放置之前运行，post在所有脚本被执行和文件被放置之后运行。
 
-Post hook is guaranteed to execute whenever pre hook was executed.
+只要pre hook被执行，Post hook就会被保证执行。
 
 ## Per transaction element hooks
 
-Hooks `psm_pre` and `psm_post` occur before and after the processing of single transaction element within the transaction. Both hooks can get executed multiple times for a single element as these hooks get called separately for %pretrans and %posttrans scriptlets in addition to the main package install or erase action.
+钩子 "psm_pre "和 "psm_post "在交易中处理单个交易元素之前和之后发生。这两个钩子可以为一个元素执行多次，因为除了主要的软件包安装或删除操作外，这些钩子还被%pretrans和%posttrans脚本小程序分别调用。
 
-Post hook is guaranteed to execute whenever pre hook was executed.
+只要前钩子被执行，后钩子就会被保证执行。
 
 ## Per scriptlet hooks
 
-Hooks `scriptlet_pre` and `scriptlet_post` occur just before and immediately after the execution of any rpm scriptlets, so these hooks can get called multiple times for a single element.
+钩子`scriptlet_pre`和`scriptlet_post`发生在任何rpm脚本执行之前和之后，所以这些钩子可以为一个元素被多次调用。
 
-Post hook is guaranteed to execute whenever pre hook was executed.
+只要pre钩子被执行，post钩子就会被保证执行。
 
-The `scriptlet_fork_post` hook is special in since it occurs in the forked child just before exec() of the scriptlet interpreter, and in that it has no pairing pre-hook. The `scriptlet_fork_post` hook only ever executes if `scriptlet_pre` was successful.
+`scriptlet_fork_post`钩子很特别，因为它发生在分叉的子程序中，就在scriptlet解释器的exec()之前，而且它没有配对的pre-hook。`scriptlet_fork_post`钩子只在`scriptlet_pre`成功时执行。
 
 ## Per file hooks
 
-Hooks `fsm_file_pre`, `fsm_file_post` and `fsm_file_prepare` execute for each individual file of all the transaction elements. Pre hook runs before a file (or directory) is created, post hook runs once rpm has done all its processing on the file. In between, `fsm_file_prepare` might be called. The prepare hook runs just after the file has been fully created and normal metadata such as ownership, permissions etc set, but before the file is moved into its final location. Note that prepare will sometimes be skipped, notably for hardlinked files where prepare gets called just once per hardlink set.
+钩子`fsm_file_pre`，`fsm_file_post`和`fsm_file_prepare`为所有事务元素的每个单独文件执行。前钩子在文件（或目录）被创建之前运行，后钩子在rpm完成对文件的所有处理后运行。在这之间，`fsm_file_prepare`可能被调用。准备钩子在文件被完全创建并设置了正常的元数据（如所有权、权限等）后运行，但在文件被移动到其最终位置之前。注意，prepare有时会被跳过，特别是对于硬链接的文件，每个硬链接集只调用一次prepare。
 
-In most cases the fi argument is the handle to all the information on the file that rpm has, but it can be NULL in the case of unowned directories. The path argument might seem redundant for owned files but in `fsm_file_pre` and `fsm_file_prepare` it holds the temporary file name which is not accessible through fi
+在大多数情况下，fi参数是rpm所拥有的关于文件的所有信息的句柄，但是在无主目录的情况下，它可以是NULL。path参数对于拥有的文件似乎是多余的，但是在`fsm_file_pre`和`fsm_file_prepare`中，它持有临时文件的名称，而这是无法通过fi访问的。
 
-Post hook is is guaranteed to execute whenever pre hook was executed.
+后钩子保证在前钩子被执行时执行。
 
-Warning: The exact relations and semantics of these hooks is subject to change as there are plans to improve rpms ability to undo file operations in case of failure.
+警告。这些钩子的确切关系和语义可能会改变，因为有计划改善rpms在失败情况下撤销文件操作的能力。
 
 ## Examples
 
-For a few simple examples, see the plugins shipped with rpm itself: [https://github.com/rpm-software-management/rpm/tree/master/plugins](https://github.com/rpm-software-management/rpm/tree/master/plugins)
+关于一些简单的例子，请看rpm本身提供的插件。[https://github.com/rpm-software-management/rpm/tree/master/plugins (https://github.com/rpm-software-management/rpm/tree/master/plugins)

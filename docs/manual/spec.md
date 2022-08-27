@@ -1,56 +1,53 @@
 ---
 layout: default
-title: rpm.org - Spec file format
+title: rpm.org - Spec文件格式
 ---
-# Spec file format
+# Spec文件格式
 
-## Generic syntax
+## 通用语法
 
-### Comments
+### 注释
 
-Comments in spec file have # at the start of the line.
+spec文件中的注释为在一行的开头使用#。
 
 ```
     # this is a comment
 ```
 
-Macros are expanded even in comment lines. If this is undesireable, escape
-the macro with an extra percent sign (%):
+即使在注释行中，宏也会被扩展。如果不希望这样，可以用一个额外的百分号（%）来转义宏。
 
 ```
     # make unversioned %%__python an error unless explicitly overridden
 ```
 
-Another option is to use built-in macro %dnl that discards text to next
-line without expanding it. (since rpm >= 4.15)
+(rpm >= 4.15之后)另一个选择是使用内置的宏 %dnl，它将文本丢弃到下一行而不展开。
 
 ```
     %dnl make unversioned %__python an error unless explicitly overridden
 ```
 
-### Conditionals
+### 条件判断
 
-RPM's spec file format allows conditional blocks of code to be used
-depending on various properties such as architecture (%ifarch /%ifnarch),
-operating system (%ifos / %ifnos), or a conditional expression (%if).
+RPM的spec文件格式允许条件判断的代码块被使用，这取决于各种类型，如架构（%ifarch /%ifnarch），操作系统（%ifos / %ifnos），或条件表达式（%if）。
 
-%ifarch is generally used for building RPM packages for multiple
-platforms like:
+%ifarch通常用于为多个平台构建RPM包，如。
+
 ```
 	%ifarch s390 s390x
 	BuildRequires: s390utils-devel
 	%endif
 ```
 
-%ifos is used to control RPM's spec file processing according to the
-build target operating system.
+%ifos用于根据构建目标操作系统控制RPM的规格文件处理。
 
-%if can be used for various purposes. The test can be evaluated based on
-the existence of a macro, like:
+%if可以用于各种目的。测试可以基于以下几点进行评估 一个宏的存在，比如。
+
 ```
 	%if %{defined with_foo} && %{undefined with_bar}
 ```
-string comparison:
+
+字符串比较：
+
 ```
 	%if "%{optimize_flags}" != "none"
 ```
@@ -58,35 +55,22 @@ or a mathematical statement:
 ```
 	%if 0%{?fedora} > 10 || 0%{?rhel} > 7
 ```
-Generally, a mathematical statement allows to use logical operators
-`&&`, `||`, `!`, relational operators `!=`, `==`, `<`, `>` , `<=`, `>=`,
-arithmetic operators `+`, `-`, `/`, `*`, the ternary operator `? :`,
-and parentheses.
 
-The conditional blocks end by %endif. Inside the conditional block %elif,
-%elifarch, %elifos or %else can be optionally used. Conditionals %endif and
-%else should not be followed by any text. Conditionals may be nested within
-other conditionals.
+一般来说，逻辑运算语句允许使用逻辑运算符`&&`，`||`，`！`，关系运算符`！=`，`==`，`<`，`>`，`<=`，`>=`，算术运算符`+`，`-`，`/`，`*`，三元运算符`? :` 和括号。
 
-%if-conditionals are not macros, and are unlikely to yield expected results
-if used in them.
+条件块以%endif结束。在条件块内可以选择使用%elif、%elifarch、%elifos或%else。条件语句%endif和%else后面不应该有任何文字。条件语句可以嵌套在其他条件语句中。
+
+%if-条件 不是宏，如果在其中使用，不太可能产生预期的结果。如果在其中使用，不太可能产生预期的结果。
 
 ## Preamble
 
-### Preamble tags
+### Preamble标签
 
 #### Name
 
-The Name tag contains the proper name of the package. Names must not
-include whitespace and may include a hyphen '-' (unlike version and release
-tags). Names should not include any numeric operators ('<', '>','=') as
-future versions of rpm may need to reserve characters other than '-'.
+Name标签包含软件包的真正名称。Name不能包括空格，但可以包括一个连字符'-'（与version和release标签不同）。Name不应包括任何数字运算符（'<'、'>'、'='），因为未来版本的rpm可能需要保留'-'以外的字符。
 
-By default subpackages are named by prepending `\<main package\>-' to
-the subpackage name(s). If you wish to change the name of a
-subpackage (most commonly this is to change the '-' to '.'), then you
-must specify the full name with the -n argument in the %package
-definition:
+默认情况下，子包的命名方式是在子包的名称前加上 `\<main package\>-' 。如果你想改变一个子包的名称（最常见的是将'-'改为'.'），那么你必须在%package定义中用-n参数指定全名:
 
 ```
 	%package -n newname
@@ -94,15 +78,13 @@ definition:
 
 #### Version
 
-Version of the packaged content, typically software.
+rpm软件包的版本，通常就是软件的版本。
 
-The version string consists of alphanumeric characters, and can optionally
-be segmented with separators `.`, ```_``` and `+`.
+版本字符串由字母、数字和字符组成，可以选择用分隔符`.`、```_``` 和 `+` 分段。
 
-Tilde (`~`) can be used to force sorting lower than base (1.1~201601 < 1.1)
-Caret (`^`) can be used to force sorting higher than base (1.1^201601 > 1.1)
-These are useful for handling pre- and post-release versions, such as
-1.0~rc1 and 2.0^a.
+波浪号（`~`）可以用来强制排序低于基数（1.1~201601 < 1.1) 
+上尖角（`^`）可用于强制排序高于基数（1.1^201601 > 1.1）。
+这些对于处理发布前和发布后的版本很有用，例如1.0~rc1和2.0^a。
 
 #### Release
 
@@ -113,10 +95,9 @@ See Version for allowed characters and modifiers.
 
 #### Epoch
 
-Optional numerical value which can be used to override normal version-release
-sorting order. It's use should be avoided if at all possible.
+可选的数值，可以用来覆盖正常的版本发布排序。如果可能的话，应该避免使用它。
 
-Non-existent epoch is exactly equal to zero epoch in all version comparisons.
+在所有的版本比较中，没有epoch等于 `epoch: 0`。
 
 #### License
 
@@ -451,20 +432,15 @@ and may be subject to formatting by glint or another RPM tool.
 
 ### Dependencies
 
-## Build scriptlets
+## 构建脚本
 
-Package build is divided into multiple separate steps, each executed
-in a separate shell.
+包的构建分为多个独立的步骤，每个步骤都在独立的shell进程中执行。
 
 ### %prep
 
-%prep prepares the sources for building. This is where sources are
-unpacked and possible patches applied, and other similar activies
-could be performed.
+%prep为构建源代码做准备。在这里，源代码被解压，可能的补丁被应用，以及其他类似的活动可以被执行。
 
-Typically (%autosetup)[autosetup.md] is used to automatically handle
-it all, but for more advanced cases there are lower level `%setup`
-and `%patch` builtin-macros available in this slot.
+通常(%autosetup)[autosetup.md]被用来自动处理这一切，但对于更高级的情况，有更低级别的 `%setup` 和 `%patch` 内置宏在这个槽中可用。
 
 In simple packages `%prep` is often just:
 ```
