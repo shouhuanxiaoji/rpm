@@ -6,8 +6,8 @@ title: rpm.org - 软件包构建过程
 
 * 解压 srpm/tar (可选)
 * [解析 spec](https://github.com/rpm-software-management/rpm/blob/master/build/parseSpec.c)  - 又见 [build/parse*.c](https://github.com/rpm-software-management/rpm/blob/master/build/)
-  * 如果buildarch检测到则多次解析spec--为每个设置了`_target_cpu'宏的arch解析一次
-  * Build will iterate over all the spec variants and build multiple versions
+  * 如果检测到`buildarch`，则多次解析spec--为每个设置了`_target_cpu'宏的arch解析一次
+  * 编译阶段会迭代遍历所有的spec文件变量，然后编译出多个版本。
 * 检查静态的requires
 * 执行构建脚本 (see [doScript()](https://github.com/rpm-software-management/rpm/blob/master/build/build.c#L95)
   * %prep
