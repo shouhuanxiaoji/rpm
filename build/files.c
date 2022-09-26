@@ -2163,6 +2163,9 @@ static rpmRC processBinaryFile(Package pkg, FileList fl, const char * fileName,
     rpmRC rc = RPMRC_OK;
     size_t fnlen = strlen(fileName);
     int trailing_slash = (fnlen > 0 && fileName[fnlen-1] == '/');
+    ARGV_t argv = NULL;
+    int argc = 0;
+    int i;
 
     /* XXX differentiate other directories from explicit %dir */
     if (trailing_slash && !fl->cur.isDir)
@@ -2189,34 +2192,23 @@ static rpmRC processBinaryFile(Package pkg, FileList fl, const char * fileName,
     if (fl->cur.isDir)
 	diskPath = rstrcat(&diskPath, "/");
 
-    if (doGlob) {
-	ARGV_t argv = NULL;
-	int argc = 0;
-	int i;
-
-	if (fl->cur.devtype) {
-	    rpmlog(RPMLOG_ERR, _("%%dev glob not permitted: %s\n"), diskPath);
-	    rc = RPMRC_FAIL;
-	    goto exit;
-	}
-
-	if (rpmGlob(diskPath, &argc, &argv) == 0) {
-	    for (i = 0; i < argc; i++) {
-		rc = addFile(fl, argv[i], NULL);
-	    }
-	    argvFree(argv);
-	} else {
-	    const char *msg = (fl->cur.isDir) ?
-				_("Directory not found by glob: %s. "
-				"Trying without globbing.\n") :
-				_("File not found by glob: %s. "
-				"Trying without globbing.\n");
-	    rpmlog(RPMLOG_DEBUG, msg, diskPath);
-	    rc = addFile(fl, diskPath, NULL);
-	}
-    } else {
+    if (!doGlob) {
 	rc = addFile(fl, diskPath, NULL);
+	goto exit;
     }
+
+    if (fl->cur.devtype) {
+	rpmlog(RPMLOG_ERR, _("%%dev glob not permitted: %s\n"), diskPath);
+	rc = RPMRC_FAIL;
+	goto exit;
+    }
+
+    if (rpmGlobPath(diskPath, RPMGLOB_NOCHECK, &argc, &argv))
+	goto exit;
+
+    for (i = 0; i < argc; i++)
+	rc = addFile(fl, argv[i], NULL);
+    argvFree(argv);
 
 exit:
     free(diskPath);
@@ -2425,16 +2417,14 @@ static void processSpecialDir(rpmSpec spec, Package pkg, FileList fl,
 	copyFileEntry(&sd->entries[fi].defEntry, &fl->def);
 	fi++;
 
-	if (rpmGlob(origfile, &globFilesCount, &globFiles) == 0) {
+	if (rpmGlobPath(origfile, RPMGLOB_NOCHECK,
+			&globFilesCount, &globFiles) == 0) {
 	    for (i = 0; i < globFilesCount; i++) {
 		rasprintf(&newfile, "%s/%s", sd->dirname, basename(globFiles[i]));
 		processBinaryFile(pkg, fl, newfile, 0);
 		free(newfile);
 	    }
 	    argvFree(globFiles);
-	} else {
-	    rpmlog(RPMLOG_ERR, _("File not found by glob: %s\n"), origfile);
-	    fl->processingFailed = 1;
 	}
 	free(origfile);
 	files++;
