@@ -938,9 +938,9 @@ static rpmSpec parseSpec(const char *specFile, rpmSpecFlags flags,
 	case PART_SOURCELIST:
 	    parsePart = parseList(spec, "%sourcelist", RPMTAG_SOURCE);
 	    break;
-//	case PART_AUTOPKG:
-//	    parsePart = parseAutopkg();
-//	    break;	
+	case PART_AUTOPKG:
+	    parsePart = parseAutoPkg(spec);
+	    break;	
 	case PART_PREP:
 	    parsePart = parsePrep(spec);
 	    break;

@@ -244,12 +244,7 @@ typedef enum rpmParseState_e {
     PART_BUILDREQUIRES		= 42+PART_BASE, /*!< */
     PART_CONF			= 43+PART_BASE, /*!< */
     PART_LAST			= 44+PART_BASE  /*!< */
-    PART_AUTOPKG        = 45+PART_BASE  /*!< */
-    PART_AUTOBUILD       = 46+PART_BASE  /*!< */
-    PART_AUTOINSTALL       = 47+PART_BASE  /*!< */
-    PART_AUTOCHECK       = 48+PART_BASE  /*!< */
-    PART_AUTOFILES       = 49+PART_BASE  /*!< */
-    PART_AUTOCHANGELOG       = 50+PART_BASE  /*!< */
+    PART_AUTOPKG        = 1001+PART_BASE  /*!< */
 } rpmParseState; 
 
 
